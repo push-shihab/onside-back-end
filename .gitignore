@@ -1,0 +1,60 @@
+# ----- Dependencies --------------------------------------------------
+node_modules/
+package-lock.json   # (optional - some teams commit this, but ignore if you prefer)
+yarn.lock           # if using yarn
+pnpm-lock.yaml      # if using pnpm
+
+# ----- Compiled output -----------------------------------------------
+dist/
+build/
+*.js               # If you put .ts and .js in the same src folder, ignore .js files
+*.js.map
+*.d.ts             # (unless you have hand-written .d.ts files you want to keep)
+
+# ----- Environment variables & secrets -------------------------------
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+
+# ----- Logs ----------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ----- OS / system files ---------------------------------------------
+.DS_Store          # macOS
+Thumbs.db          # Windows
+desktop.ini        # Windows
+
+# ----- IDE / editor files --------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ----- Temporary / cache files ---------------------------------------
+*.tmp
+*.temp
+.cache/
+.eslintcache
+.tscache          # sometimes used by ts-node or other tools
+
+# ----- Coverage reports (if you add testing later) -------------------
+coverage/
+.nyc_output/
+
+# ----- Runtime data --------------------------------------------------
+pids/
+*.pid
+*.seed
+*.pid.lock
