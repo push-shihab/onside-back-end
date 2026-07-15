@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
 import dotenv from "dotenv";
 import cors from "cors";
 
@@ -29,8 +29,16 @@ async function run() {
     const db = client.db("onside");
     const allPlayers = db.collection("players");
 
+    // getting all players
     app.get("/api/players", async (req: Request, res: Response) => {
       const result = await allPlayers.find().toArray();
+      res.json(result);
+    });
+
+    // getting data of individual player
+    app.get("/api/player", async (req: Request, res: Response) => {
+      const id = req.query.id as string;
+      const result = await allPlayers.findOne({ _id: new ObjectId(id) });
       res.json(result);
     });
 
