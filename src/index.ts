@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -28,6 +28,38 @@ async function run() {
     await client.connect();
     const db = client.db("onside");
     const allPlayers = db.collection("players");
+    const sessionCollection = db.collection("session");
+    const userCollection = db.collection("user");
+
+    // verify token
+    const verifyToken = async (
+      req: Request,
+      res: Response,
+      next: NextFunction,
+    ) => {
+      const { authorization } = req.headers;
+      if (!authorization) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const token = authorization?.split(" ")[1];
+      if (!token) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const userSession = await sessionCollection.findOne({ token });
+      if (!userSession) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      if (!userSession) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = await userCollection.findOne({ _id: userSession.userId });
+      if (!user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      next();
+    };
 
     // getting all players
     app.get("/api/players", async (req: Request, res: Response) => {
@@ -43,18 +75,54 @@ async function run() {
     });
 
     // getting all players by user id
-    app.get("/api/user/players", async (req: Request, res: Response) => {
-      const id = req.query.id as string;
-      const result = await allPlayers.find({ userId: id }).toArray();
-      res.json(result);
-    });
+    app.get(
+      "/api/user/players",
+      verifyToken,
+      async (req: Request, res: Response) => {
+        const id = req.query.id as string;
+        const result = await allPlayers.find({ userId: id }).toArray();
+        res.json(result);
+      },
+    );
 
     // creating a new player
-    app.post("/api/player/new", async (req: Request, res: Response) => {
-      const playerData = req.body;
-      const result = await allPlayers.insertOne(playerData);
-      res.json(result);
-    });
+    app.post(
+      "/api/player/new",
+      verifyToken,
+      async (req: Request, res: Response) => {
+        const playerData = req.body;
+        const result = await allPlayers.insertOne(playerData);
+        res.json(result);
+      },
+    );
+
+    // updating player data by user
+    app.patch(
+      "/api/player/update",
+      verifyToken,
+      async (req: Request, res: Response) => {
+        const updatedData = req.body;
+        const filter = { _id: new ObjectId(updatedData.playerId) };
+        const updatedFields = {
+          $set: {
+            ...updatedData,
+          },
+        };
+        const result = await allPlayers.updateOne(filter, updatedFields);
+        res.json(result);
+      },
+    );
+
+    // deleting a player by user
+    app.delete(
+      "/api/player/delete",
+      verifyToken,
+      async (req: Request, res: Response) => {
+        const id = req.query.id as string;
+        const result = await allPlayers.deleteOne({ _id: new ObjectId(id) });
+        res.json(result);
+      },
+    );
 
     await client.db("admin").command({ ping: 1 });
     console.log(
