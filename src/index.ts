@@ -42,6 +42,20 @@ async function run() {
       res.json(result);
     });
 
+    // getting all players by user id
+    app.get("/api/user/players", async (req: Request, res: Response) => {
+      const id = req.query.id as string;
+      const result = await allPlayers.find({ userId: id }).toArray();
+      res.json(result);
+    });
+
+    // creating a new player
+    app.post("/api/player/new", async (req: Request, res: Response) => {
+      const playerData = req.body;
+      const result = await allPlayers.insertOne(playerData);
+      res.json(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
